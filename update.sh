@@ -253,6 +253,16 @@ update_default_lan_addr() {
     fi
 }
 
+# 自定义主机名
+update_default_hostname() {
+    local CFG_PATH="$BUILD_DIR/package/base-files/files/bin/config_generate"
+    local custom_hostname="OpenWRT"
+
+    if [ -f "$CFG_PATH" ]; then
+        sed -i "s/set system\.\@system\[-1\]\.hostname=.*/set system.\@system[-1].hostname='$custom_hostname'/" "$CFG_PATH"
+    fi
+}
+
 remove_something_nss_kmod() {
     local ipq_mk_path="$BUILD_DIR/target/linux/qualcommax/Makefile"
     local target_mks=("$BUILD_DIR/target/linux/qualcommax/ipq60xx/target.mk" "$BUILD_DIR/target/linux/qualcommax/ipq807x/target.mk")
@@ -1007,6 +1017,7 @@ main() {
     fix_mk_def_depends
     add_wifi_default_set
     update_default_lan_addr
+    update_default_hostname
     remove_something_nss_kmod
     update_affinity_script
     # fix_build_for_openssl
