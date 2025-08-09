@@ -627,6 +627,28 @@ fix_quickstart() {
     fi
 }
 
+remove_quickstart_link() {
+    local quickstart_path="$BUILD_DIR/feeds/small8/luci-app-quickstart"
+    
+    if [ -d "$quickstart_path" ]; then
+        # 1. 删除 Lua 控制器中的链接添加代码
+        local lua_file="$quickstart_path/luasrc/controller/quickstart.lua"
+        if [ -f "$lua_file" ]; then
+            # 删除包含 "append_simple_link" 的行
+            sed -i '/append_simple_link/d' "$lua_file"
+            echo "已删除 QuickStart 链接添加代码"
+        fi
+
+        # 2. 删除 HTML 模板中的链接元素
+        local html_file="$quickstart_path/luasrc/view/quickstart/overview.htm"
+        if [ -f "$html_file" ]; then
+            # 删除包含链接的整个按钮元素
+            sed -i '/<a.*iStoreOS官网/,/<\/a>/d' "$html_file"
+            echo "已删除 QuickStart 链接HTML元素"
+        fi
+    fi
+}
+
 update_oaf_deconfig() {
     local conf_path="$BUILD_DIR/feeds/small8/open-app-filter/files/appfilter.config"
     local uci_def="$BUILD_DIR/feeds/small8/luci-app-oaf/root/etc/uci-defaults/94_feature_3.0"
@@ -927,6 +949,7 @@ main() {
     add_backup_info_to_sysupgrade
     update_mosdns_deconfig
     fix_quickstart
+    remove_quickstart_link
     update_oaf_deconfig
     add_timecontrol
     add_gecoosac
