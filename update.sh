@@ -635,6 +635,7 @@ fix_quickstart_js() {
     else
         echo "Quickstart index.js 或补丁文件不存在，请检查路径是否正确。"
     fi
+}
 
 update_oaf_deconfig() {
     local conf_path="$BUILD_DIR/feeds/small8/open-app-filter/files/appfilter.config"
