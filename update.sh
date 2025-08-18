@@ -617,7 +617,7 @@ update_mosdns_deconfig() {
     fi
 }
 
-fix_quickstart() {
+fix_quickstart_lua() {
     local file_path="$BUILD_DIR/feeds/small8/luci-app-quickstart/luasrc/controller/istore_backend.lua"
     # 下载新的istore_backend.lua文件并覆盖
     if [ -f "$file_path" ]; then
@@ -626,6 +626,15 @@ fix_quickstart() {
             -o "$file_path"
     fi
 }
+
+fix_quickstart_js() {
+    local qs_index_path="$BUILD_DIR/feeds/small8/luci-app-quickstart/htdocs/luci-static/quickstart/index.js"
+    local fix_path="$BASE_PATH/patches/quickstart_index.js"
+    if [ -f "$qs_index_path" ] && [ -f "$fix_path" ]; then
+        cat "$fix_path" >"$qs_index_path"
+    else
+        echo "Quickstart index.js 或补丁文件不存在，请检查路径是否正确。"
+    fi
 
 update_oaf_deconfig() {
     local conf_path="$BUILD_DIR/feeds/small8/open-app-filter/files/appfilter.config"
@@ -926,8 +935,8 @@ main() {
     update_dnsmasq_conf
     add_backup_info_to_sysupgrade
     update_mosdns_deconfig
-    fix_quickstart
-    fix_quickstart1
+    fix_quickstart_lua
+    fix_quickstart_js
     update_oaf_deconfig
     add_timecontrol
     add_gecoosac
