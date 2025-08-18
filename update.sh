@@ -23,7 +23,7 @@ FEEDS_CONF="feeds.conf.default"
 GOLANG_REPO="https://github.com/sbwml/packages_lang_golang"
 GOLANG_BRANCH="25.x"
 THEME_SET="argon"
-LAN_ADDR="192.168.1.1"
+LAN_ADDR="192.168.68.1"
 
 clone_repo() {
     if [[ ! -d $BUILD_DIR ]]; then
@@ -244,6 +244,16 @@ update_default_lan_addr() {
     local CFG_PATH="$BUILD_DIR/package/base-files/files/bin/config_generate"
     if [ -f $CFG_PATH ]; then
         sed -i 's/192\.168\.[0-9]*\.[0-9]*/'$LAN_ADDR'/g' $CFG_PATH
+    fi
+}
+
+# 自定义主机名
+update_default_hostname() {
+    local CFG_PATH="$BUILD_DIR/package/base-files/files/bin/config_generate"
+    local custom_hostname="OpenWRT"
+
+    if [ -f "$CFG_PATH" ]; then
+        sed -i "s/set system\.\@system\[-1\]\.hostname=.*/set system.\@system[-1].hostname='$custom_hostname'/" "$CFG_PATH"
     fi
 }
 
@@ -897,6 +907,7 @@ main() {
     fix_mk_def_depends
     add_wifi_default_set
     update_default_lan_addr
+    update_default_hostname
     remove_something_nss_kmod
     update_affinity_script
     update_ath11k_fw
@@ -916,6 +927,7 @@ main() {
     add_backup_info_to_sysupgrade
     update_mosdns_deconfig
     fix_quickstart
+    fix_quickstart1
     update_oaf_deconfig
     add_timecontrol
     add_gecoosac
