@@ -535,7 +535,7 @@ fix_compile_coremark() {
 }
 
 update_homeproxy() {
-    local repo_url="https://github.com/immortalwrt/homeproxy.git"
+    local repo_url="https://github.com/VIKINGYFY/homeproxy.git"
     local target_dir="$BUILD_DIR/feeds/small8/luci-app-homeproxy"
 
     if [ -d "$target_dir" ]; then
@@ -545,6 +545,32 @@ update_homeproxy() {
             echo "错误：从 $repo_url 克隆 homeproxy 仓库失败" >&2
             exit 1
         fi
+    fi
+}
+
+update_homeproxy_resources() {
+    local homeproxy_dir="$BUILD_DIR/feeds/small8/luci-app-homeproxy"
+    if [ -d "$homeproxy_dir" ]; then
+        echo "更新 homeproxy 资源文件..."
+        # 清空资源目录
+        rm -rf "$homeproxy_dir/root/etc/homeproxy/resources/*"
+        # 创建临时目录并克隆规则
+        local surge_rules_dir=$(mktemp -d)
+        git clone -q --depth=1 --single-branch --branch "release" "https://github.com/Loyalsoldier/surge-rules.git" "$surge_rules_dir"
+        cd "$surge_rules_dir"
+        RES_VER=$(git log -1 --pretty=format:'%s' | grep -o "[0-9]*")
+        # 生成版本文件
+        echo "$RES_VER" | tee china_ip4.ver china_ip6.ver china_list.ver gfw_list.ver
+        # 处理规则文件
+        awk -F, '/^IP-CIDR,/{print $2 > "china_ip4.txt"} /^IP-CIDR6,/{print $2 > "china_ip6.txt"}' cncidr.txt
+        sed 's/^\.//g' direct.txt > china_list.txt
+        sed 's/^\.//g' gfw.txt > gfw_list.txt
+        # 移动文件到homeproxy资源目录
+        mv -f ./{china_*,gfw_list}.{ver,txt} "$homeproxy_dir/root/etc/homeproxy/resources/"
+        # 清理临时目录
+        cd "$BUILD_DIR"
+        rm -rf "$surge_rules_dir"
+        echo "homeproxy 资源已更新！"
     fi
 }
 
@@ -995,6 +1021,7 @@ main() {
     remove_unwanted_packages
     remove_tweaked_packages
     update_homeproxy
+    update_homeproxy_resources
     fix_default_set
     fix_miniupnpd
     update_golang
